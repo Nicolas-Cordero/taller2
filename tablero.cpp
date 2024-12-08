@@ -7,15 +7,23 @@ class tablero{
         vector<vector<char>> matriz;
         char jugadorActual;
         char oponente; 
+        bool juegoTerminado;
     public:
-        tablero(){
+        tablero(){ // constructor
             matriz = vector<vector<char>>(3, vector<char>(3, ' '));
             jugadorActual = 'X';
+            juegoTerminado = false;
         }
-        char getDato(int fila, int columna){
+        bool gerJuegoTerminado(){ // get juego terminado
+            return juegoTerminado;
+        }
+        bool setJuegoTerminado(bool estado){ // set juego terminado
+            juegoTerminado = estado;
+        }     
+        char getDato(int fila, int columna){ // get dato dada posicion
             return matriz[fila][columna];
         }
-        int getSize(){
+        int getSize(){ // get size
             return matriz.size();
         }
         void imprimirTablero(){ /// funcion 1, imprimir tablero
@@ -33,12 +41,14 @@ class tablero{
             }
         }
         bool hacerMovimiento(int fila, int columna){ /// funcion 2, hacer movimiento
+        // dada posicion se inserta el jugador actual
             if (fila >= 0 && fila < 3 && columna >= 0 && columna < 3 && matriz[fila][columna] == ' '){
                 matriz[fila][columna] = jugadorActual;
                 return true;
             }
             return false;
         }
+        // dada posicion se inserta el char ingresado
         bool hacerMovimientoForzado(int fila, int columna, char forzado){ /// funcion 2, hacer movimiento
             if (fila >= 0 && fila < 3 && columna >= 0 && columna < 3 && matriz[fila][columna] == ' '){
                 matriz[fila][columna] = forzado;
@@ -47,21 +57,90 @@ class tablero{
             return false;
         }
 
+        int contarEspaciosVacios (){ /// funcion 2.1, contar espacios vacios
+            int contador = 0;
+            for (int i = 0; i < 3; i++){
+                for (int j = 0; j < 3; j++){
+                    if (matriz[i][j] == ' '){
+                        contador++;
+                    }
+                }
+            }
+            return contador;
+        }
+
+        int calcularCostoTablero(){
+            // Horizontal
+            for (int i = 0; i < 3; ++i){
+                if(matriz[i][0] == jugadorActual && matriz[i][1] == jugadorActual && matriz[i][0] == matriz[i][2]){
+                    if(matriz[i][0] == 'X'){
+                        return (contarEspaciosVacios()+1)  ;
+                    }
+                    else if (matriz[i][0] == 'O'){
+                        return -(contarEspaciosVacios()+1);
+                        
+                    }
+                
+            }
+
+            // vertical 
+            for (int j = 0; i < 3; j++){
+                if (matriz[0][j] == matriz[1][j] && matriz[0][j]  == matriz[2][j]){
+                    if(matriz[0][j] == 'X'){
+                        return (contarEspaciosVacios()+1);
+                    }
+                    else if (matriz[0][j] == 'O'){
+                        return -(contarEspaciosVacios()+1);
+                        
+                    }
+                }
+            }
+        
+            
+
+            // Diagonal
+            if(matriz[0][0] == matriz[1][1] &&  matriz[0][0] == matriz[2][2]){
+                if(matriz[0][0] == 'X'){
+                    return (contarEspaciosVacios()+1);
+                }
+                else if (matriz[0][0] == 'O'){
+                    return -(contarEspaciosVacios()+1);
+                    
+                }
+            }
+            if (matriz[0][2] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][0] == jugadorActual){
+                 if(matriz[0][0] == 'X'){
+                    return (contarEspaciosVacios()+1);
+                }
+                else if (matriz[0][0] == 'O'){
+                    return -(contarEspaciosVacios()+1);
+                    
+                }
+            }
+                // casilleros vacios
+                return 0;
+            }
+        }
+
         char hayGanador(){ /// funcion 3, hay ganador
             for (int i = 0; i < 3; ++i){
-              
+                // horizontales
                 if ((matriz[i][0] == jugadorActual && matriz[i][1] == jugadorActual && matriz[i][2] == jugadorActual) ||
                 (matriz[0][i] == jugadorActual && matriz[1][i] == jugadorActual && matriz[2][i] == jugadorActual)){
+                    juegoTerminado = true;
                     return jugadorActual;
                 }
-
+                // verticales
                 else if ((matriz[0][0] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][2] == jugadorActual) ||
                 (matriz[0][2] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][0] == jugadorActual)){
+                    juegoTerminado  = true;
                     return jugadorActual;
                 }
             }
+            // diagonales
             if ((matriz[0][0] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][2] == jugadorActual) ||
                 (matriz[0][2] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][0] == jugadorActual)) {
+                juegoTerminado = true;  
                 return jugadorActual;
             }
             return ' ';
@@ -70,10 +149,12 @@ class tablero{
             for (int i = 0; i < 3; i++){
                 for (int j = 0; j < 3; j++){
                     if (matriz[i][j] == ' '){
+                        
                         return false;
                     }
                 }
             }
+            juegoTerminado = true;
             return true;
         }
         void cambiarJugador(){ /// funcion 5, cambiar jugador
