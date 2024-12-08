@@ -22,9 +22,9 @@ int minimax(tablero &t, int profundidad, bool esMax, int alpha, int beta){
     for (int i = 0; i < 3; ++i){
         for(int j = 0; j < 3; ++j){
             if (t.getDato(i, j) == ' '){
-                t.hacerMovimiento(i, j, jugador);
+                t.hacerMovimientoForzado(i, j, jugador);
                 int puntaje = minimax(t, profundidad + 1, !esMax, alpha, beta);
-                t.hacerMovimiento(i, j, ' ');
+                t.hacerMovimiento(i, j);
 
                 if (esMax){
                     mejorPuntaje = max(puntaje, mejorPuntaje);
@@ -49,9 +49,9 @@ pair<int, int> obtenerMejorMovimiento(tablero &t){
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             if (t.getDato(i, j) == ' '){
-                t.hacerMovimiento(i, j, t.getOponente());
+                t.hacerMovimientoForzado(i, j, t.getOponente());
                 int puntaje = minimax(t, 0 , false, -10000, 10000);
-                t.hacerMovimiento(i, j, ' ');
+                t.hacerMovimiento(i, j);
 
                 if (puntaje > mejorPuntaje){
                     mejorPuntaje = puntaje;
@@ -85,11 +85,16 @@ int pvp(){
         cout << "Jugador " << t.getJugadorActual() << " ingrese la COLUMNA (A, B o C): ";
         cin >> columnaChar;
         columna = conversorSimpleLetra(columnaChar);
+        while (columna == -1){
+            cout << "Columna invalida, intente de nuevo" << endl;
+            cout << "Jugador " << t.getJugadorActual() << " ingrese la COLUMNA (A, B o C): ";
+            cin >> columnaChar;
+        }
         cout << "Jugador " << t.getJugadorActual() << " ingrese la FILA (0, 1 o 2): ";
         cin >> fila;
         
 
-        if (t.hacerMovimiento(fila, columna, ' ')){
+        if (t.hacerMovimiento(fila, columna)){
             t.imprimirTablero();
             if (t.hayGanador() != ' '){
                 cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
@@ -101,7 +106,8 @@ int pvp(){
             }
             t.cambiarJugador();
             cout << "--------------------------------" << endl;
-            auto mejorMovimiento = obtenerMejorMovimiento(t);
+            tablero tCopia = t;
+            auto mejorMovimiento = obtenerMejorMovimiento(tCopia);
             cout << "siguiente mejor movimiento";
             cout << "first: " << mejorMovimiento.first;
             cout << "second: " << mejorMovimiento.second;

@@ -32,17 +32,21 @@ class tablero{
                 cout << "  +---+---+---+" << endl;
             }
         }
-        bool hacerMovimiento(int fila, int columna, char jugadorForzado){ /// funcion 2, hacer movimiento
+        bool hacerMovimiento(int fila, int columna){ /// funcion 2, hacer movimiento
             if (fila >= 0 && fila < 3 && columna >= 0 && columna < 3 && matriz[fila][columna] == ' '){
-                if (jugadorForzado != ' '){
-                    matriz[fila][columna] = jugadorForzado;
-                    return true;
-                }
                 matriz[fila][columna] = jugadorActual;
                 return true;
             }
             return false;
         }
+        bool hacerMovimientoForzado(int fila, int columna, char forzado){ /// funcion 2, hacer movimiento
+            if (fila >= 0 && fila < 3 && columna >= 0 && columna < 3 && matriz[fila][columna] == ' '){
+                matriz[fila][columna] = forzado;
+                return true;
+            }
+            return false;
+        }
+
         char hayGanador(){ /// funcion 3, hay ganador
             for (int i = 0; i < 3; ++i){
               
