@@ -72,25 +72,29 @@ class tablero{
         int calcularCostoTablero(){
             // Horizontal
             for (int i = 0; i < 3; ++i){
-                if(matriz[i][0] == jugadorActual && matriz[i][1] == jugadorActual && matriz[i][0] == matriz[i][2]){
+                if(matriz[i][0] == matriz[i][1] && matriz[i][1] == matriz[i][2] && matriz[i][0] != ' '){
                     if(matriz[i][0] == 'X'){
-                        return (contarEspaciosVacios()+1)  ;
+                        return 10;
+                        //return (contarEspaciosVacios()+1)  ;
                     }
                     else if (matriz[i][0] == 'O'){
-                        return -(contarEspaciosVacios()+1);
+                        return -10;
+                        //return -(contarEspaciosVacios()+1);
                         
                     }
                 
             }
 
             // vertical 
-            for (int j = 0; i < 3; j++){
-                if (matriz[0][j] == matriz[1][j] && matriz[0][j]  == matriz[2][j]){
+            for (int j = 0; j < 3; j++){
+                if (matriz[0][j] == matriz[1][j] && matriz[1][j]  == matriz[2][j] && matriz[0][j] != ' '){
                     if(matriz[0][j] == 'X'){
-                        return (contarEspaciosVacios()+1);
+                        return 10;
+                        //return (contarEspaciosVacios()+1);
                     }
                     else if (matriz[0][j] == 'O'){
-                        return -(contarEspaciosVacios()+1);
+                        return -10;
+                        //return -(contarEspaciosVacios()+1);
                         
                     }
                 }
@@ -99,21 +103,25 @@ class tablero{
             
 
             // Diagonal
-            if(matriz[0][0] == matriz[1][1] &&  matriz[0][0] == matriz[2][2]){
+            if(matriz[0][0] == matriz[1][1] &&  matriz[1][1] == matriz[2][2] && matriz[0][0] != ' '){
                 if(matriz[0][0] == 'X'){
-                    return (contarEspaciosVacios()+1);
+                    return 10;
+                    //return (contarEspaciosVacios()+1);
                 }
                 else if (matriz[0][0] == 'O'){
-                    return -(contarEspaciosVacios()+1);
+                    return -10;
+                    //return -(contarEspaciosVacios()+1);
                     
                 }
             }
-            if (matriz[0][2] == jugadorActual && matriz[1][1] == jugadorActual && matriz[2][0] == jugadorActual){
+            if (matriz[0][2] ==  matriz[1][1] && matriz[1][1] == matriz[2][0] && matriz[0][2] != ' '){
                  if(matriz[0][0] == 'X'){
-                    return (contarEspaciosVacios()+1);
+                    return 10;
+                    //return (contarEspaciosVacios()+1);
                 }
                 else if (matriz[0][0] == 'O'){
-                    return -(contarEspaciosVacios()+1);
+                    return -10;
+                    //return -(contarEspaciosVacios()+1);
                     
                 }
             }

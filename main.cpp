@@ -4,9 +4,9 @@
 using namespace std;
 
 int minimax2(tablero& t, const int& profundidad, const bool& max){
-    int costo = t.calcularCostoTablero();
-    if(profundidad == 9 || t.hayGanador() != ' '){
-        return costo;
+    int puntaje = t.calcularCostoTablero();
+    if(puntaje == 10 || puntaje == -10){
+        return puntaje;
     }
     if (max){
         int maxEvaluar = -10000;
@@ -90,15 +90,15 @@ int minimax(tablero &t, int profundidad, bool esMax, int alpha, int beta){
     return mejorPuntaje;
 }
 
-char* obtenerMejorMovimiento2(tablero t){
+int* obtenerMejorMovimiento2(tablero t){
     int minMaxEvaluar = t.getJugadorActual() == 'X' ? -10000 : 10000;
-    char * mejorMovimiento = new char[3];
+    int * mejorMovimiento = new int[3];
     // loop en todos los hijos desde la posicion actual
     for (int i= 0 ; i < 3; i++){
         for (int j = 0; j < 3; j++){
             if (t.getDato(i, j) == ' '){
                 // hacemos el movimiento actual
-                t.setMovimiento(i, j, t.getJugadorActual() ? 'x' : 'o');
+                t.setMovimiento(i, j, t.getJugadorActual() == 'X' ? 'X' : 'O');
                 bool maxOrMin = t.getJugadorActual() == 'X' ? true : false;
 
                 // evaluacion del movimiento con minimax
@@ -111,8 +111,8 @@ char* obtenerMejorMovimiento2(tablero t){
                 // obtenemos la maxima evaluacoin si el jugador es X
                 if(t.getJugadorActual() == 'X'){
                     if (evaluar > minMaxEvaluar){
-                        mejorMovimiento[0] = (char)(j + 'A');
-                        mejorMovimiento[1] = (char)(i + '1');
+                        mejorMovimiento[0] = j;
+                        mejorMovimiento[1] = i;
 
                         minMaxEvaluar = evaluar;
                     }
@@ -120,8 +120,8 @@ char* obtenerMejorMovimiento2(tablero t){
                 // obtenemos la minima evaluacion si el jugador es O
                 else{
                     if (evaluar < minMaxEvaluar){
-                        mejorMovimiento[0] = (char)(j + 'A');
-                        mejorMovimiento[1] = (char)(i + '1');
+                        mejorMovimiento[0] = j;
+                        mejorMovimiento[1] = i;
                         minMaxEvaluar = evaluar;
                     }
                 }
@@ -203,10 +203,24 @@ int pvia(){
             t.cambiarJugador();
             /// IA
             cout << "-*--*-Es el turno de la IA-*--*- " << endl;
-            char* mejorMovimiento = obtenerMejorMovimiento2(t);
+            int* mejorMovimiento = obtenerMejorMovimiento2(t);
             cout << "La IA ha seleccionado la casilla: " << mejorMovimiento[0] << 
             "+" << mejorMovimiento[1] << "+" << mejorMovimiento[2] << endl;
-            
+            if(t.hacerMovimiento(mejorMovimiento[1], mejorMovimiento[0])){
+                t.imprimirTablero();
+                t.cambiarJugador();
+                if (t.hayGanador() != ' '){
+                    cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
+                    break;
+                }
+                if (t.tableroLleno()){
+                    cout << "Empate!" << endl;
+                    break;
+                }
+            }
+            else{
+                cout << "Movimiento invalido, intente de nuevo" << endl;
+            }
         }
         else{
             cout << "Movimiento invalido, intente de nuevo" << endl;
