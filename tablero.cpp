@@ -115,11 +115,11 @@ class tablero{
                 }
             }
             if (matriz[0][2] ==  matriz[1][1] && matriz[1][1] == matriz[2][0] && matriz[0][2] != ' '){
-                 if(matriz[0][0] == 'X'){
+                 if(matriz[0][2] == 'X'){
                     return 10;
                     //return (contarEspaciosVacios()+1);
                 }
-                else if (matriz[0][0] == 'O'){
+                else if (matriz[0][2] == 'O'){
                     return -10;
                     //return -(contarEspaciosVacios()+1);
                     

@@ -16,10 +16,15 @@ int minimax2(tablero& t, const int& profundidad, const bool& max){
                 if(t.getDato(i, j) == ' '){
                     // populamos el tablero con el jugador actual
                     t.hacerMovimientoForzado(i, j, 'X');
+                    cout << "Despues de hacer movimiento en (" << i << " " << j << "): "<< endl;
+                    t.imprimirTablero();
 
                     maxEvaluar = std::max(maxEvaluar, minimax2(t, profundidad + 1, !max));
                    
                     t.setMovimiento(i, j, ' ');
+                    cout << "Despues de deshacer movimiento en (" << i << " " << j << "): "<< endl;
+                    t.imprimirTablero();
+
                     t.setJuegoTerminado (false);
                 }
             }
@@ -140,7 +145,7 @@ int pvia(){
             cout << "-*--*-Es el turno de la IA-*--*- " << endl;
             int* mejorMovimiento = obtenerMejorMovimiento2(t);
             cout << "La IA ha seleccionado la casilla: " << mejorMovimiento[0] << 
-            "+" << mejorMovimiento[1] << "+" << mejorMovimiento[2] << endl;
+            "+" << mejorMovimiento[1]  << endl;
             if(t.hacerMovimiento(mejorMovimiento[1], mejorMovimiento[0])){
                 t.imprimirTablero();
                 t.cambiarJugador();
