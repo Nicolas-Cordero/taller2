@@ -3,140 +3,63 @@
 #include <limits>
 using namespace std;
 
-int minimax2(tablero &t, const int &profundidad, const bool &max, int alfa, int beta)
-{
-    int puntaje = t.calcularCostoTablero();
-    if (puntaje == 10 || puntaje == -10 || t.tableroLleno())
-    {
-        return puntaje;
+
+
+
+
+pair<pair<int, int>, int> minimax(tablero t, int depth) {
+    int puntaje = t.calcularPuntaje(); // Calcula el puntaje del tablero
+
+    // Caso base: el juego ha terminado
+    if (puntaje == 10 || puntaje == -10) {
+        return {{-1, -1}, puntaje}; // Retorna puntaje terminal
+    } else if (t.tableroLleno()) {
+        return {{-1, -1}, 0}; // Retorna empate
     }
 
-    if (max)
-    {
-        int maxEvaluar = -10000;
+    pair<int, int> mejorMovimiento;
+    int mejorPuntaje;
 
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if (t.getDato(i, j) == ' ')
-                {
-                    // populamos el tablero con el jugador actual
-                    t.hacerMovimientoForzado(i, j, 'X');
-                    cout << "Despues de hacer movimiento en (" << i << " " << j << "): " << endl;
-                    t.imprimirTablero();
-
-                    // llamada recursiva
-                    maxEvaluar = std::max(maxEvaluar, minimax2(t, profundidad + 1, false, alfa, beta));
-
-
-                    t.setMovimiento(i, j, ' ');
-                    cout << "Despues de deshacer movimiento en (" << i << " " << j << "): " << endl;
-                    t.imprimirTablero();
-
-                    t.setJuegoTerminado(false);
-                    // poda alfa beta
-                    alfa = std::max(alfa,maxEvaluar);
-                    if (alfa >= beta)
-                    {
-                        return maxEvaluar;
-                    }   
-                }
-            }
-        }
-        return maxEvaluar;
+    // Inicializar dependiendo del jugador actual
+    if (t.getJugadorActual() == 'X') {
+        mejorPuntaje = -10000; // Inicializamos a un valor bajo para maximizar
+    } else {
+        mejorPuntaje = 10000; // Inicializamos a un valor alto para minimizar
     }
-    else
-    {
-        int minEvaluar = 10000;
 
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if (t.getDato(i, j) == ' ')
-                {
-                    // populamos el tablero con el jugador actual
-                    t.hacerMovimientoForzado(i, j, 'O');
-                    cout << "Despues de hacer movimiento en (" << i << " " << j << "): " << endl;
-                    t.imprimirTablero();
+    // Explorar todos los movimientos posibles
+    for (int i = 0; i < t.getSize(); i++) {
+        for (int j = 0; j < t.getSize(); j++) {
+            if (t.getCasilla(i, j) == ' ') { // Casilla vacía
+                tablero tCopia = t;         // Crear copia del tablero
+                tCopia.setCasilla(i, j, tCopia.getJugadorActual()); // Realizar movimiento
+                tCopia.cambiarJugador();    // Cambiar turno
 
-                    minEvaluar = min(minEvaluar, minimax2(t, profundidad + 1, true, alfa, beta));
+                // Evaluar el movimiento recursivamente
+                int resultado = minimax(tCopia, depth + 1).second;
 
-                    t.setMovimiento(i, j, ' ');
-                    cout << "Despues de deshacer movimiento en (" << i << " " << j << "): " << endl;
-                    t.imprimirTablero();
-
-                    t.setJuegoTerminado(false);
-
-                    // poda alfa beta
-                    beta = std::min(beta,minEvaluar);
-
-                    if(beta <= alfa){
-                        return minEvaluar;
+                if (t.getJugadorActual() == 'X') { // Maximizar
+                    if (resultado > mejorPuntaje) {
+                        mejorPuntaje = resultado;
+                        mejorMovimiento = {i, j};
+                    }
+                } else { // Minimizar
+                    if (resultado < mejorPuntaje) {
+                        mejorPuntaje = resultado;
+                        mejorMovimiento = {i, j};
                     }
                 }
             }
         }
-        return minEvaluar;
     }
+
+    // Retornar el mejor movimiento y su puntaje asociado
+    return {mejorMovimiento, mejorPuntaje};
 }
 
-int *obtenerMejorMovimiento2(tablero t)
-{
-    int minMaxEvaluar = t.getJugadorActual() == 'X' ? -10000 : 10000;
-    int *mejorMovimiento = new int[2];
-    // loop en todos los hijos desde la posicion actual
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            if (t.getDato(i, j) == ' ')
-            {
-                // hacemos el movimiento actual
-                t.setMovimiento(i, j, t.getJugadorActual() == 'X' ? 'X' : 'O');
-                bool maxOrMin = t.getJugadorActual() == 'X' ? true : false;
 
-                // evaluacion del movimiento con minimax
-                int evaluar = minimax2(t, 0, maxOrMin, -10000, 10000);
 
-                // deshacemos el movimiento
-                t.setMovimiento(i, j, ' ');
-                t.setJuegoTerminado(false);
 
-                // obtenemos la maxima evaluacoin si el jugador es X
-                if (t.getJugadorActual() == 'X')
-                {
-                    if (evaluar > minMaxEvaluar)
-                    {
-                        mejorMovimiento[0] = j;
-                        mejorMovimiento[1] = i;
-
-                        minMaxEvaluar = evaluar;
-                    }
-                }
-                // obtenemos la minima evaluacion si el jugador es O
-                else
-                {
-                    if (evaluar < minMaxEvaluar)
-                    {
-                        mejorMovimiento[0] = j;
-                        mejorMovimiento[1] = i;
-                        minMaxEvaluar = evaluar;
-                    }
-                }
-            }
-        }
-    }
-    if (t.getDato(mejorMovimiento[1], mejorMovimiento[0]) != ' ')
-    {
-        cout << "Error: movimiento inválido generado por la IA" << endl;
-        return nullptr;
-    }
-
-    mejorMovimiento[2] = '\0';
-    return mejorMovimiento;
-}
 
 int conversorSimpleLetra(char letra)
 {
@@ -155,78 +78,34 @@ int conversorSimpleLetra(char letra)
     return -1;
 }
 
-int pvia()
+char conversorSimpleNumero(int num)
 {
-    tablero t;
-    t.imprimirTablero();
-    int fila, columna;
-    char columnaChar;
-    while (true)
+    if (num == 0)
     {
-        // Jugador
-        cout << "Jugador " << t.getJugadorActual() << " ingrese la COLUMNA (A, B o C): ";
-        cin >> columnaChar;
-        columna = conversorSimpleLetra(columnaChar);
-        while (columna == -1)
-        {
-            cout << "Columna invalida, intente de nuevo" << endl;
-            cout << "Jugador " << t.getJugadorActual() << " ingrese la COLUMNA (A, B o C): ";
-            cin >> columnaChar;
-        }
-        cout << "Jugador " << t.getJugadorActual() << " ingrese la FILA (0, 1 o 2): ";
-        cin >> fila;
-
-        if (t.hacerMovimiento(fila, columna))
-        {
-            t.imprimirTablero();
-            if (t.hayGanador() != ' ')
-            {
-                cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
-                break;
-            }
-            if (t.tableroLleno())
-            {
-                cout << "Empate!" << endl;
-                break;
-            }
-            t.cambiarJugador();
-            /// IA
-            cout << "-*--*-Es el turno de la IA-*--*- " << endl;
-            int *mejorMovimiento = obtenerMejorMovimiento2(t);
-            cout << "La IA ha seleccionado la casilla: " << mejorMovimiento[0] << "+" << mejorMovimiento[1] << endl;
-            if (mejorMovimiento != nullptr && t.hacerMovimiento(mejorMovimiento[1], mejorMovimiento[0]))
-            {
-                t.imprimirTablero();
-                if (t.hayGanador() != ' ')
-                {
-                    cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
-                    break;
-                }
-                if (t.tableroLleno())
-                {
-                    cout << "Empate!" << endl;
-                    break;
-                }
-                t.cambiarJugador();
-            }
-            else
-            {
-                cout << "Movimiento invalido generado por la IA, intente de nuevo" << endl;
-            }
-        }
-        else
-        {
-            cout << "Movimiento invalido, intente de nuevo" << endl;
-        }
+        return 'A';
     }
-    return 0;
+    if (num == 1)
+    {
+        return 'B';
+    }
+    if (num == 2)
+    {
+        return 'C';
+    }
+    
+    return -1;
+}
+
+int pvia(){
+
 }
 
 int pvp()
 {
-    tablero t;
+    tablero t('X');
     t.imprimirTablero();
     int fila, columna;
+    int puntajeActual;
     char columnaChar;
     while (true)
     {
@@ -238,29 +117,38 @@ int pvp()
             cout << "Columna invalida, intente de nuevo" << endl;
             cout << "Jugador " << t.getJugadorActual() << " ingrese la COLUMNA (A, B o C): ";
             cin >> columnaChar;
+            columna = conversorSimpleLetra(columnaChar);
         }
         cout << "Jugador " << t.getJugadorActual() << " ingrese la FILA (0, 1 o 2): ";
         cin >> fila;
+        while (fila < 0 || fila > 2)
+        {
+            cout << "Fila invalida, intente de nuevo" << endl;
+            cout << "Jugador " << t.getJugadorActual() << " ingrese la FILA (0, 1 o 2): ";
+            cin >> fila;
+        }
 
-        if (t.hacerMovimiento(fila, columna))
+        t.setCasilla(fila, columna, t.getJugadorActual());
+        
+        t.imprimirTablero();
+        puntajeActual = t.calcularPuntaje();
+        if (puntajeActual == 10 || puntajeActual == -10)
         {
-            t.imprimirTablero();
-            if (t.hayGanador() != ' ')
-            {
-                cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
-                break;
-            }
-            if (t.tableroLleno())
-            {
-                cout << "Empate!" << endl;
-                break;
-            }
-            t.cambiarJugador();
+            cout << "Jugador " << t.getJugadorActual() << " ha ganado!" << endl;
+            break;
         }
-        else
+        else if (puntajeActual == 0)
         {
-            cout << "Movimiento invalido, intente de nuevo" << endl;
+            cout << "Empate!" << endl;
+            break;
         }
+        t.cambiarJugador();
+        pair<pair<int,int>,int> outPutMiniMax = minimax(t, 0);
+        cout << "Mejor jugada sugerida por minimaxNuevo: (" << 
+        outPutMiniMax.first.first << ", " << conversorSimpleNumero(outPutMiniMax.first.second) << ")" << endl;
+
+        
+        
     }
     return 0;
 }
