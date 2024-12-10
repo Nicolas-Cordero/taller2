@@ -1,5 +1,5 @@
 #pragma once
-#include "tablero.h"
+#include "tablero.hpp"
 #include <vector>
 
 class nodo{
@@ -23,6 +23,7 @@ class nodo{
         int getAltura();
         void setAltura(int alturaIngresada);
 
+        tablero getTableroActual();
         
 
         int getAlfa();

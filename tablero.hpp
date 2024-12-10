@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 using namespace std;
@@ -14,9 +15,9 @@ public:
     tablero(char jugadorActualIngresado);
     
     bool getJuegoTerminado();
-    bool setJuegoTerminado(bool estado);
+    void setJuegoTerminado(bool estado);
     char getCasilla(int fila, int columna);
-    char setCasilla(int fila, int columna, char dato);
+    void setCasilla(int fila, int columna, char dato);
     int getSize();
     void imprimirTablero();
     int contarEspaciosVacios();

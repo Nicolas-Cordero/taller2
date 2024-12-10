@@ -1,4 +1,6 @@
-#include "Nodo.h"
+#include "nodo.hpp"
+#include "tablero.hpp"
+#include <vector>
 
 nodo::nodo(tablero* t, int altura, char jugadorActualIngresado, pair<int,int> casillaJugadaActualIngresada){
     hijos = vector<nodo*>();
@@ -67,11 +69,18 @@ bool nodo::getEsMax(){
 void nodo::setEsMax(char jugadorActual){
     if (jugadorActual == 'X'){
         esMax = true;
+        tableroActual->cambiarJugador();
     }
     else{
         esMax = false;
+        tableroActual->cambiarJugador();
     }
 }  
+
+tablero nodo::getTableroActual(){
+    return *tableroActual;
+}
+
 nodo::~nodo() {
     for (auto hijo : hijos) {
         delete hijo;

@@ -1,60 +1,109 @@
-#include "tablero.cpp"
 #include <iostream>
+#include "tablero.cpp"
+#include "nodo.cpp"
+#include <vector>
 #include <limits>
 using namespace std;
 
-
-
-
-
-pair<pair<int, int>, int> minimax(tablero t, int depth) {
-    int puntaje = t.calcularPuntaje(); // Calcula el puntaje del tablero
-
-    // Caso base: el juego ha terminado
-    if (puntaje == 10 || puntaje == -10) {
-        return {{-1, -1}, puntaje}; // Retorna puntaje terminal
-    } else if (t.tableroLleno()) {
-        return {{-1, -1}, 0}; // Retorna empate
-    }
-
-    pair<int, int> mejorMovimiento;
-    int mejorPuntaje;
-
-    // Inicializar dependiendo del jugador actual
-    if (t.getJugadorActual() == 'X') {
-        mejorPuntaje = -10000; // Inicializamos a un valor bajo para maximizar
+nodo* crearArbolEstadosTablero(nodo* raiz, bool esMaxIngresado, int contadorIngresado) {
+    vector<pair<int,int>> indicesMatriz = {{0,0},{0,1},{0,2},
+                                           {1,0},{1,1},{1,2},
+                                           {2,0},{2,1},{2,2}};
+    int contador = 0;
+    char jugadorActual;
+    char oponente;
+    if (esMaxIngresado) {
+        jugadorActual = 'X';
+        oponente = 'O';
     } else {
-        mejorPuntaje = 10000; // Inicializamos a un valor alto para minimizar
+        jugadorActual = 'O';
+        oponente = 'X';
     }
 
-    // Explorar todos los movimientos posibles
-    for (int i = 0; i < t.getSize(); i++) {
-        for (int j = 0; j < t.getSize(); j++) {
-            if (t.getCasilla(i, j) == ' ') { // Casilla vacía
-                tablero tCopia = t;         // Crear copia del tablero
-                tCopia.setCasilla(i, j, tCopia.getJugadorActual()); // Realizar movimiento
-                tCopia.cambiarJugador();    // Cambiar turno
+    for (int juas = 0; juas < contadorIngresado; juas++) {
+        int i = indicesMatriz[juas].first;
+        int j = indicesMatriz[juas].second;
 
-                // Evaluar el movimiento recursivamente
-                int resultado = minimax(tCopia, depth + 1).second;
+        tablero tableroAux = raiz->getTableroActual();
+        tableroAux.setCasilla(i, j, jugadorActual);
+        nodo* hijo = new nodo(&tableroAux, raiz->getAltura() + 1, oponente, {i, j});
 
-                if (t.getJugadorActual() == 'X') { // Maximizar
-                    if (resultado > mejorPuntaje) {
-                        mejorPuntaje = resultado;
-                        mejorMovimiento = {i, j};
-                    }
-                } else { // Minimizar
-                    if (resultado < mejorPuntaje) {
-                        mejorPuntaje = resultado;
-                        mejorMovimiento = {i, j};
-                    }
-                }
+        if (tableroAux.calcularPuntaje() == 10) {
+            hijo->setPuntaje(10);
+            raiz->agregarHijo(hijo);
+        } else if (tableroAux.calcularPuntaje() == -10) {
+            hijo->setPuntaje(-2);
+            raiz->agregarHijo(hijo);
+        } else if (tableroAux.tableroLleno()) {
+            hijo->setPuntaje(-1);
+            raiz->agregarHijo(hijo);
+        } else {
+            int copia = contadorIngresado - contador - 1; // Ajuste para evitar bucle infinito
+            if (copia > 0) { // Asegurarse de que la recursión termine
+                raiz->agregarHijo(crearArbolEstadosTablero(hijo, !esMaxIngresado, copia));
+            }
+        }
+        contador++;
+    }
+    return raiz;
+}
+
+
+
+
+nodo* miniMaxPodaAlfaBeta(nodo* raiz){
+    if(raiz->getCantidadHijos() == 0){
+        return raiz;
+    }
+    int alfa = raiz->getAlfa();
+    int beta = raiz->getBeta();
+    int mejorValor;
+
+    if(raiz->getEsMax()){
+        // TURNO X, MAX
+        mejorValor = numeric_limits<int>::min();
+        for(nodo *hijo : raiz->getHijos()){
+            
+            hijo = miniMaxPodaAlfaBeta(hijo);
+            mejorValor = max(mejorValor, hijo->getPuntaje());
+            alfa = max(alfa, mejorValor);
+            raiz->setPuntaje(mejorValor);
+            if(beta <= alfa){
+
+                break; // PODA ALFA BETA
             }
         }
     }
+    else{
+        // TURNO O, MIN
+        mejorValor = numeric_limits<int>::max();
+        for(nodo *hijo : raiz->getHijos()){
 
-    // Retornar el mejor movimiento y su puntaje asociado
-    return {mejorMovimiento, mejorPuntaje};
+            hijo = miniMaxPodaAlfaBeta(hijo);
+            mejorValor = min(mejorValor, hijo->getPuntaje());
+            beta = min(beta, mejorValor);
+            raiz->setPuntaje(mejorValor);
+            if(beta <= alfa){
+                break; // PODA ALFA BETA
+            }
+
+        }
+    }
+    return raiz;
+    
+
+}
+
+nodo* encontrarMejorMovimiento(nodo* raiz){
+    raiz->setAlfa(numeric_limits<int>::min());
+    raiz->setAlfa(numeric_limits<int>::max());
+    raiz = miniMaxPodaAlfaBeta(raiz);
+    for(nodo* hijo : raiz->getHijos()){
+        if(hijo->getPuntaje() == raiz->getPuntaje()){
+            raiz = hijo;
+            break;
+        }
+    }
 }
 
 
@@ -96,9 +145,6 @@ char conversorSimpleNumero(int num)
     return -1;
 }
 
-int pvia(){
-
-}
 
 int pvp()
 {
@@ -143,15 +189,83 @@ int pvp()
             break;
         }
         t.cambiarJugador();
-        pair<pair<int,int>,int> outPutMiniMax = minimax(t, 0);
-        cout << "Mejor jugada sugerida por minimaxNuevo: (" << 
-        outPutMiniMax.first.first << ", " << conversorSimpleNumero(outPutMiniMax.first.second) << ")" << endl;
+        
 
         
         
     }
     return 0;
 }
+
+void pvia(){
+    tablero* inicial = new tablero('X');
+    cout << "ACA1!!" << endl;
+    nodo* raiz = new nodo(inicial, 1, 'O', {-1,-1});
+    raiz = crearArbolEstadosTablero(raiz, false, 9); 
+    cout << "ACA2!!" << endl;
+    nodo* actual = raiz;
+
+    actual->getTableroActual().imprimirTablero();
+
+    
+    while(actual->getCantidadHijos() != 0){
+        if(actual->getTableroActual().getJugadorActual() == 'X'){
+        // TURNO HUMA
+            tablero aux = actual->getTableroActual();
+
+            ///INPUT HUMANO
+            char columnaChar;
+            int columna, fila;
+            cout << "Jugador " << 'X' << " ingrese la COLUMNA (A, B o C): ";
+            cin >> columnaChar;
+            columna = conversorSimpleLetra(columnaChar);
+            while (columna == -1)
+            {
+                cout << "Columna invalida, intente de nuevo" << endl;
+                cout << "Jugador " << 'X' << " ingrese la COLUMNA (A, B o C): ";
+                cin >> columnaChar;
+                columna = conversorSimpleLetra(columnaChar);
+            }
+            cout << "Jugador " <<'X' << " ingrese la FILA (0, 1 o 2): ";
+            cin >> fila;
+            while (fila < 0 || fila > 2)
+            {
+                cout << "Fila invalida, intente de nuevo" << endl;
+                cout << "Jugador " << 'X' << " ingrese la FILA (0, 1 o 2): ";
+                cin >> fila;
+            }
+
+            cout <<"DEBUG 1" << endl;
+
+            aux.setCasilla(fila, columna, 'X');
+            cout <<"DEBUG 2" << endl;
+            
+            
+            cout <<"DEBUG 3" << endl;
+
+        cout <<"TERMINA TURNO HUMANO" << endl;
+        actual->setEsMax(false);
+        actual->getTableroActual().cambiarJugador();
+        }
+        
+        else{
+            actual->getTableroActual().imprimirTablero();    
+            actual->setAlfa(numeric_limits<int>::min());
+            actual->setBeta(numeric_limits<int>::max());
+            actual = miniMaxPodaAlfaBeta(actual);
+            for(nodo* hijo : actual->getHijos()){
+                if(hijo->getPuntaje() == actual->getPuntaje()){
+                    actual = hijo;
+                    break;
+                }
+            }
+        }
+        
+        
+        cout << "jugador actual" <<actual->getTableroActual().getJugadorActual() << endl;
+        cout <<"TERMINA TURNO IA" << endl;
+    }
+}    
 
 int main()
 {
@@ -178,7 +292,15 @@ int main()
         case 2:
             cout << "+---+---+---+---+---+" << endl;
             cout << "Player vs IA" << endl;
-            pvia();
+            try
+            {
+                pvia();
+            }
+            catch(const bad_alloc& e)
+            {
+                cout<<"Error de asignacion de memoria"<<endl;
+            }
+            
 
             break;
         case 3:
