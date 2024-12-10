@@ -114,7 +114,7 @@ Evalúa sus hijos (5, 9, 2): toma el mayor (9).
 Si alfa >= beta, se detiene la evaluación.
 Este proceso reduce las evaluaciones innecesarias, optimizando el rendimiento.
 
-![image alt]("link")
+![image alt](https://github.com/Nicolas-Cordero/taller2/blob/b603cebaaeef9367e6367e997e5f5affc1cb3997/image.png)
 
 # ANÁLISIS DE COMPLEJIDAD DEL ALGORITMO:
 
